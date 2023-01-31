@@ -52,4 +52,12 @@ public class PlayerMapper {
                 .guardian(domain.getIsGuardian())
                 .build();
     }
+
+    public  PlayerEntity toRest(Player domain){
+        return PlayerEntity.builder()
+                .name(domain.getName())
+                .guardian(domain.getIsGuardian())
+                .build();
+
+    }
 }

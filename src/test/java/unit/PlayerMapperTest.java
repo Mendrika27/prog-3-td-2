@@ -66,6 +66,22 @@ public class PlayerMapperTest {
     }
 
     @Test
+    void player_to_entity_ok(){
+        PlayerEntity playerEntity= PlayerEntity.builder()
+                .id(1)
+                .name("P1")
+                .team(teamRepositoryMock.findByName("Barea"))
+                .guardian(false)
+                .build();
+        PlayerEntity actual = subject.toEntity(Player.builder()
+                        .id(1)
+                        .name("P1")
+                        .isGuardian(false)
+                        .teamName("Barea")
+                .build());
+        assertEquals(playerEntity, actual);
+    }
+    @Test
     void player_scorer_to_entity_ok() {
         Instant now = Instant.now();
         MatchEntity matchEntity1 = MatchEntity.builder()

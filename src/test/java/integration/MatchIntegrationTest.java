@@ -38,6 +38,18 @@ class MatchIntegrationTest {
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals(expectedMatch2(), actual);
     }
+    @Test
+    void read_by_id_ko() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(get("/matches/2"))
+                .andExpect(status().is4xxClientError())
+                .andReturn()
+                .getResponse();
+        Match actual = objectMapper.readValue(
+                response.getContentAsString(), Match.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+        assertEquals(expectedMatch2(), actual);
+    }
 
     private static Match expectedMatch2() {
         return Match.builder()
