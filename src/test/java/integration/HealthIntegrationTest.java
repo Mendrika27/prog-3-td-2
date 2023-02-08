@@ -11,19 +11,22 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
 public class HealthIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
-
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .findAndRegisterModules();
     @Test
     void ping_test_ok() throws Exception{
         MockHttpServletResponse response = mockMvc
                 .perform(get("/ping"))
+                .andExpect(status().isOk())
                 .andReturn()
                 .getResponse();
-        //assertEquals("pong", "pong");
+        assertEquals("pong",response.getContentAsString());
     }
 }
