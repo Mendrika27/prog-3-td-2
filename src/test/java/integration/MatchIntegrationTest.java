@@ -5,6 +5,7 @@ import app.foot.controller.rest.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
+@Slf4j
 class MatchIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -46,7 +48,8 @@ class MatchIntegrationTest {
     }
 
     @Test
-    void read_match_ok() throws Exception {
+
+    void read_matches_ok() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -80,6 +83,7 @@ class MatchIntegrationTest {
                         .content(objectMapper.writeValueAsString(List.of(toCreateOne,toCreateTwo)))
                         .contentType("application/json")
                         .accept("application/json"))
+
                 .andReturn()
                 .getResponse();
         Match actual = objectMapper.readValue(response.getContentAsString(),objectMapper.getTypeFactory().constructType(Match.class));
@@ -102,6 +106,8 @@ class MatchIntegrationTest {
         toReturn.add(expectedMatch3());
         return toReturn;
     }
+
+
     private static Match expectedMatch2() {
         return Match.builder()
                 .id(2)
@@ -254,6 +260,7 @@ class MatchIntegrationTest {
         return Player.builder()
                 .id(6)
                 .name("J6")
+                .teamName("E3")
                 .isGuardian(false)
                 .teamName(team3().getName())
                 .build();
@@ -278,6 +285,7 @@ class MatchIntegrationTest {
         return Player.builder()
                 .id(3)
                 .name("J3")
+                .teamName("E2")
                 .isGuardian(false)
                 .teamName(team2().getName())
                 .build();
@@ -311,4 +319,6 @@ class MatchIntegrationTest {
                 response.getContentAsString(),
                 playerListType);
     }
+
+
 }

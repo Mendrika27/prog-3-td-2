@@ -17,16 +17,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class HealthIntegrationTest {
     @Autowired
-    private MockMvc mockMvc;
-    private final ObjectMapper objectMapper = new ObjectMapper()
+    private MockMvc mockMvc;    private final ObjectMapper objectMapper = new ObjectMapper()
             .findAndRegisterModules();
+
     @Test
-    void ping_test_ok() throws Exception{
+    void ping_test_ok() throws Exception {
         MockHttpServletResponse response = mockMvc
                 .perform(get("/ping"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse();
-        assertEquals("pong",response.getContentAsString());
+        assertEquals("pong", response.getContentAsString());
+
     }
 }
