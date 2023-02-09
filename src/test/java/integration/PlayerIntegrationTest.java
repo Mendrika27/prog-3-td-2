@@ -16,8 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -67,7 +69,7 @@ class PlayerIntegrationTest {
     }
 
     @Test
-    void create_players_ok() throws Exception{
+    void create_players_ok() throws Exception {
         Player toCreate = Player.builder()
                 .name("Joe Doe")
                 .isGuardian(false)
@@ -85,43 +87,26 @@ class PlayerIntegrationTest {
         assertEquals(1, actual.size());
         assertEquals(toCreate, actual.get(0).toBuilder().id(null).build());
     }
-
     @Test
-    void create_player_ko() throws Exception{
-        Player toCreate = Player.builder()
+    void put_players_ok() throws Exception {
+        Player toPut = Player.builder()
+                .id(6)
                 .name("Joe Doe")
                 .isGuardian(false)
                 .teamName("E1")
                 .build();
         MockHttpServletResponse response = mockMvc
-                .perform(post("/players").content(objectMapper.writeValueAsString(List.of(toCreate)))
+                .perform(post("/players")
+                        .content(objectMapper.writeValueAsString(List.of(toPut)))
                         .contentType("application/json")
                         .accept("application/json"))
                 .andReturn()
                 .getResponse();
         List<Player> actual = convertFromHttpResponse(response);
 
-        assertNotEquals(1, actual.size());
-        assertNotEquals(toCreate, actual.get(1).toBuilder().id(null).build());
-
+        assertEquals(1, actual.size());
+        assertEquals(List.of(toPut),actual);
     }
-
-    @Test
-    void put_player_ok() throws Exception{
-        Player toChange = player3();
-        MockHttpServletResponse response = mockMvc
-                .perform(put("/players").content(String.valueOf(toChange)))
-                .andReturn()
-                .getResponse();
-    }
-
-    @Test
-    void put_player_ko() throws Exception{
-        Player toChange = player3();
-        MockHttpServletResponse response = mockMvc
-                .perform(put("/players")).andReturn().getResponse();
-    }
-
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)
             throws JsonProcessingException, UnsupportedEncodingException {
         CollectionType playerListType = objectMapper.getTypeFactory()
