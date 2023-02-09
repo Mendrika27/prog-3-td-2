@@ -5,6 +5,7 @@ import app.foot.controller.rest.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static utils.TestUtils.assertThrowsExceptionMessage;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -61,10 +63,8 @@ class MatchIntegrationTest {
     }
     @Test
     void read_match_ko() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/matches"))
-                .andExpect(status().isNotFound())
-                .andReturn()
-                .getResponse();
+        assertThrowsExceptionMessage("Request processing failed: java.lang.RuntimeException: Match#100 not found.",
+                ServletException.class,()->mockMvc.perform((get("/matches/100"))));
 
     }
     @Test
@@ -83,13 +83,27 @@ class MatchIntegrationTest {
                         .content(objectMapper.writeValueAsString(List.of(toCreateOne,toCreateTwo)))
                         .contentType("application/json")
                         .accept("application/json"))
-
                 .andReturn()
                 .getResponse();
         Match actual = objectMapper.readValue(response.getContentAsString(),objectMapper.getTypeFactory().constructType(Match.class));
         assertEquals(HttpStatus.OK.value(),response.getStatus());
         assertEquals(expectedMatch(),actual);
     }
+    @Test
+    void add_match_at_3_ko() throws Exception {
+        PlayerScorer toCreateOne = PlayerScorer.builder()
+                .player(player9())
+                .scoreTime(50)
+                .isOG(false)
+                .build();
+        MockHttpServletResponse response = mockMvc.perform(post("/matches/3/goals")
+                        .content(objectMapper.writeValueAsString(List.of(toCreateOne)))
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andExpect(status().is4xxClientError())
+                .andReturn()
+                .getResponse();
+        assertEquals(HttpStatus.BAD_REQUEST.value(),response.getStatus());}
     private static Match expectedMatch(){
         return Match.builder()
                 .id(3)
@@ -262,6 +276,14 @@ class MatchIntegrationTest {
                 .name("J6")
                 .teamName("E3")
                 .isGuardian(false)
+                .teamName(team3().getName())
+                .build();
+    }
+    private static Player player9() {
+        return Player.builder()
+                .id(1)
+                .name("G1")
+                .isGuardian(true)
                 .teamName(team3().getName())
                 .build();
     }
